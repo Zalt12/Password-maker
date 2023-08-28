@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Function to generate a random password
+generate_password() {
+    local length=$1
+    tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w $length | head -n 1
+}
+
+# Function to check password strength
+check_strength() {
+    local password=$1
+    local length=${#password}
+    local has_lower=false
+    local has_upper=false
+    local has_digit=false
+
+    for ((i = 0; i < length; i++)); do
+        char="${password:$i:1}"
+        if [[ $char =~ [a-z] ]]; then
+            has_lower=true
+        elif [[ $char =~ [A-Z] ]]; then
+            has_upper=true
+        elif [[ $char =~ [0-9] ]]; then
+            has_digit=true
+        fi
+    done
+
+    if [ $length -ge 8 ] && $has_lower && $has_upper && $has_digit; then
+        echo "Password is strong!"
+    else
+        echo "Password is weak. Please include at least 8 characters, including lowercase, uppercase, and digits."
+    fi
+}
+
+echo "Random Password Generator"
+read -p "Enter desired password length: " length
+
+if [ $length -lt 8 ]; then
+    echo "Password length must be at least 8 characters."
+    exit 1
+fi
+
+password=$(generate_password $length)
+echo "Generated Password: $password"
+check_strength $password
